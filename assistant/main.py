@@ -104,7 +104,7 @@ class Assistant:
             # extract scene
             kp2, desc2 = self.extract_image_descriptors(img_scene)   
 
-            print 'Scene - %d features' % (len(kp1), len(kp2))
+            print 'Scene - %d features' % (len(kp2))
 
             matcher = cv2.BFMatcher(cv2.NORM_L2)
             raw_matches = matcher.knnMatch(desc1, trainDescriptors = desc2, k = 2) #2
