@@ -1,8 +1,8 @@
 Glassistant: Cognitive Assistant based on Google Glass
 ========================================================
-Glassistant is a framework to write cognitive assistants that utilizes computer vision and runs on Google Glass. It is built on []Gabriel infrastructure](https://github.com/cmusatyalab/gabriel).
+Glassistant is a framework to write cognitive assistants that utilizes computer vision and runs on Google Glass. It is built on [Gabriel infrastructure](https://github.com/cmusatyalab/gabriel).
 
-* `android` directory contains the started code for the Android client.
+* `android` directory contains the starter code for the Android client.
 * `bin` contains the binaries to run the framework on the cloud.
 * `assistant` contains the code for the cognitive assistant.
 
@@ -46,7 +46,7 @@ You will also need the following packages.
 * six==1.1.0
 * Flask==0.9
 * Flask-RESTful==0.2.1
-
+* OpenCV >2.3 (Run this script: https://github.com/jayrambhia/Install-OpenCV/blob/master/Ubuntu/2.4/opencv2_4_5.sh)
 
 To install, you can either
 
@@ -73,6 +73,7 @@ to replace `eth0` occurrences in the following files.
 
 Installation - Application
 -------------
+
 
 Described at README file of each application directory
 
