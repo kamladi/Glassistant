@@ -97,7 +97,7 @@ class Assistant:
 
         try:
      
-            img_device = cv2.imread("device.jpg", 0)
+            img_device = cv2.imread("../assistant/device.jpg", 0)
             img_scene = img
             # extract device - cached for now
             kp1, desc1 = self.extract_cached_descriptors("device.jpg")
