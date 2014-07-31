@@ -70,7 +70,7 @@ class Assistant:
 
     def extract_cached_descriptors(self, name):
 
-        fname = name + ".xml"
+        fname = "../assistant/" + name + ".xml"
 
         try:
             f = open(fname, 'r')
