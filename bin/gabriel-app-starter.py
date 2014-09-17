@@ -37,13 +37,17 @@ from assistant.main import Assistant
 
 class DummyVideoApp(AppProxyThread):
 
+    def __init__(self, *args, **kw):
+        super( DummyVideoApp, self ).__init__( *args, **kw )
+        self.a = Assistant()
+
     def handle(self, header, data):
         #print Assistant.handle_frame(header, data)
-	a = Assistant()
-	res = a.handle_frame(header, data)
-	print "handling"
-	print res
-	return res
+    	res = self.a.handle_frame(header, data)
+    	print "handling"
+    	print res
+    	return res
+
 
 class DummyAccApp(AppProxyThread):
     def chunks(self, l, n):
