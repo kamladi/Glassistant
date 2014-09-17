@@ -4,8 +4,15 @@ public class GlassistantStateTracker {
 	
 	private int currentStep = 0;
 	private String currentText = "";
-	
+	private boolean resetting = false;
+	private int internalResetCounter;
+
 	public int getCurrentStep () {
+		
+		if (resetting) {
+			return getCurrentStepWhileResetting();
+		}
+		
 		return currentStep;
 	}	
 	
@@ -20,6 +27,21 @@ public class GlassistantStateTracker {
 	
 	public String getCurrentText() {
 		return currentText;
+	}
+	
+	public void resetState() {
+		currentStep = 0;
+		internalResetCounter = 0;
+		resetting = true;
+	}
+	
+	private int getCurrentStepWhileResetting() {
+		
+		internalResetCounter++;
+		if (internalResetCounter == 12) {
+			resetting = false;
+		}
+		return 0;
 	}
 
 }

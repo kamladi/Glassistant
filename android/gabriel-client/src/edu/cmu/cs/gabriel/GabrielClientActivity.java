@@ -37,6 +37,8 @@ import android.os.Message;
 import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
+import android.view.GestureDetector;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -88,7 +90,6 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
                 WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON+
                 WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);		
 	
-		
 		// Connect to Gabriel Server if it's not experiment
 		if (Const.IS_EXPERIMENT == false){
 			final Button expButton = (Button) findViewById(R.id.button_runexperiment);
@@ -98,6 +99,21 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
 		}
 	}
 
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
+            
+        	// user tapped touchpad, do something
+        	stateTracker.resetState();
+			mTTS.setSpeechRate(1f);
+			mTTS.speak("Restarting", TextToSpeech.QUEUE_FLUSH, null);
+
+            return true;
+        }
+
+        return super.onKeyDown(keyCode, event);
+    }
+   
 	boolean experimentStarted = false;
 	public void startExperiment(View view) {
 		if (!experimentStarted) {
