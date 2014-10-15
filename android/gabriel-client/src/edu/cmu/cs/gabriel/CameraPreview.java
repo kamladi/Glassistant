@@ -37,6 +37,8 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 	public CameraPreview(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		Log.d("krha_debug", "context : " + context);
+		Log.d("krha_debug", "context : " + context);
+
 		if (mCamera == null) {
 
 			// Launching Camera App using voice command need to wait.  

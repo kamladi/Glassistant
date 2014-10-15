@@ -25,6 +25,8 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.hardware.Camera;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -42,11 +44,9 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.ImageView;
 
 public class GabrielClientActivity extends Activity implements TextToSpeech.OnInitListener, SensorEventListener {
 	
@@ -180,6 +180,8 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
 		Log.d(DEBUG_TAG, "on init once");
 		mPreview = (CameraPreview) findViewById(R.id.camera_preview);
 		mPreview.setPreviewCallback(previewCallback);
+		//mPreview.setVisibility(View.GONE);
+
 		Const.ROOT_DIR.mkdirs();
 		Const.LATENCY_DIR.mkdirs();
 		// TextToSpeech.OnInitListener
@@ -278,6 +280,21 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
 			// Initialization failed.
 			Log.e("krha_app", "Could not initialize TextToSpeech.");
 		}
+		
+		ImageView image = (ImageView) findViewById(R.id.imageView1); 
+		image.setImageResource(R.drawable.screen2);
+		
+		Resources res = getResources();
+		String mDrawableName = "screen0";
+		int resID = res.getIdentifier(mDrawableName , "drawable", getPackageName());
+		Drawable drawable = res.getDrawable(resID );
+		
+		image.setImageDrawable(drawable);
+		
+		
+		int queuConstant = TextToSpeech.QUEUE_ADD;
+		mTTS.speak("Welcome to Glassistant!", queuConstant, null);
+	
 	}
 
 	@Override
@@ -338,12 +355,15 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
 			if (msg.what == NetworkProtocol.NETWORK_RET_RESULT) {
 				if (mTTS != null){
 					String ttsMessage = "Assistant is confused";
+					String nextImage = "screen0";
 					boolean newStep = false;
 
 					try {
 						JSONObject returnObj= new JSONObject((String) msg.obj);
 						ttsMessage = returnObj.getString("warning");
 						int nextStep = returnObj.getInt("next_step");
+						nextImage = returnObj.getString("image");
+
 //						if (nextStep != stateTracker.getCurrentStep()) {
 //							newStep = true;
 //						}
@@ -359,6 +379,16 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
 					Log.d("ILTER", "New Step: " + newStep);
 
 					if (!ttsMessage.equals(stateTracker.getCurrentText())) {
+						
+						ImageView image = (ImageView) findViewById(R.id.imageView1); 
+						//image.setImageResource(R.drawable["screen2"]);
+						Resources res = getResources();
+						String mDrawableName = nextImage;
+						int resID = res.getIdentifier(mDrawableName , "drawable", getPackageName());
+						Drawable drawable = res.getDrawable(resID );
+
+						image.setImageDrawable(drawable);
+		
 						Log.d("ILTER", "Speaking " + ttsMessage);
 						stateTracker.setCurrentText(ttsMessage);
 						Log.d(LOG_TAG, "tts string origin: " + ttsMessage);
@@ -508,6 +538,8 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
 	}
 	
 	private void terminate() {
+		
+		System.out.println(Thread.currentThread().getStackTrace());
 		Log.d(DEBUG_TAG, "on terminate");
 		// change only soft state
 		stopBatteryRecording();

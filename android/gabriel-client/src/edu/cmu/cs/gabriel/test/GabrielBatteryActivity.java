@@ -114,7 +114,8 @@ public class GabrielBatteryActivity extends Activity implements TextToSpeech.OnI
 	}
 
 	private void init() {
-		mPreview = (CameraPreview) findViewById(R.id.camera_preview);
+		mPreview = (CameraPreview)findViewById(R.id.camera_preview);
+
 		Const.ROOT_DIR.mkdirs();
 		if (tokenController == null){
 			tokenController = new TokenController(Const.LATENCY_FILE);

@@ -111,6 +111,9 @@ public class VideoStreamingThread extends Thread {
 		try {
 			tcpSocket = new Socket();
 			tcpSocket.setTcpNoDelay(true);
+			Log.i("Ilter", remoteIP.getHostName());
+			Log.i("Ilter", String.valueOf(remotePort));
+
 			tcpSocket.connect(new InetSocketAddress(remoteIP, remotePort), 5 * 1000);
 			networkWriter = new DataOutputStream(tcpSocket.getOutputStream());
 			DataInputStream networkReader = new DataInputStream(tcpSocket.getInputStream());
