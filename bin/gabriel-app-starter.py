@@ -36,10 +36,12 @@ from gabriel.common.config import Const
 from assistant.main import Assistant
 
 class DummyVideoApp(AppProxyThread):
+    def setTestMode(test_mode=False):
+        self.test_mode = test_mode
 
     def handle(self, header, data):
         #print Assistant.handle_frame(header, data)
-	a = Assistant()
+	a = Assistant(self.test_mode)
 	res = a.handle_frame(header, data)
 	print "handling"
 	print res
@@ -62,6 +64,11 @@ class DummyAccApp(AppProxyThread):
 if __name__ == "__main__":
     result_queue = list()
 
+    test_mode = False
+    if "--test" in sys.argv:
+        test_mode = True
+        sys.argv.remove("--test")
+
     sys.stdout.write("Discovery Control VM\n")
     service_list = get_service_list(sys.argv)
     video_ip = service_list.get(SERVICE_META.VIDEO_TCP_STREAMING_ADDRESS)
@@ -78,6 +85,7 @@ if __name__ == "__main__":
     video_client.isDaemon = True
     dummy_video_app = DummyVideoApp(video_frame_queue, result_queue, \
             app_id=Protocol_measurement.APP_DUMMY) # dummy app for image processing
+    dummy_video_app.setTestMode(test_mode)
     dummy_video_app.start()
     dummy_video_app.isDaemon = True
 
