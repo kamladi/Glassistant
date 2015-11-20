@@ -73,9 +73,12 @@ def warpFrame(frame, rect, mask):
     return (warp, warp_frame)
 
 def detect_monitor(frame):
+    # Takes in a frame
+    # returns (is the monitor present, is the monitor upright)
     MONITOR_PRESENT = False
     MID_BUTTON_PRESENT = False
     UPRIGHT = False
+    SCREEN_PRESENT = False
 
     blueLower = np.array([110, 60, 30])
     blueUpper = np.array([130, 255, 255])
@@ -137,22 +140,20 @@ def detect_monitor(frame):
                     possible_button.append((center, radius))
                 # img = cv2.circle(warp_frame,center,radius,(0,255,0),2)
 
-        ## check if it's the middle button
+        # check if it's the middle button
         if len(possible_button) == 0:
             pass
             # print "Error: no button found!"
         else:
             for button in possible_button:
-                # print button
                 center = button[0]
                 radius = button[1]
-                # img = cv2.circle(warp_frame,center,radius,(0,255,0),2)
 
                 delta = 8
+                # if the circle is at the center of the monitor with the right size
+                # it is the middle button
                 if orientation == "portrait":
                     if monitor_width/2 - delta <= center[0] <= monitor_width/2 + delta:
-                        # print ("button x: %d; monitor mid: %d; range: (%d, %d)" %
-                        #         (center[0], monitor_mid_pos[0], monitor_mid_pos[0] - delta, monitor_mid_pos[0] + delta))
                         if (center[1] > monitor_height/2):
                             UPRIGHT = True
                         img = cv2.circle(warp_frame,center,radius,(0,255,0),2)
@@ -160,22 +161,23 @@ def detect_monitor(frame):
                 if orientation == 'landscape':
                     if ((monitor_width/2 - delta) <= center[1]
                         <= (monitor_width/2 + delta)):
-                        # print (monitor_width/2, center[1])
                         img =  cv2.circle(warp_frame,center,radius,(0,255,0),2)
                         MID_BUTTON_PRESENT = True
-
             # cv2.imshow("warp_frame", warp_frame)
+
     if (MID_BUTTON_PRESENT and MONITOR_PRESENT):
-        if (detect_screen_check(warp_frame)):
+        # double check if the monitor is present by checking if there's a screen on the monitor
+        SCREEN_PRESENT = detect_screen_check(warp_frame)
+        if (SCREEN_PRESENT):
             print("{:%Y-%b-%d %H:%M:%S}: detect monitor at orientation: {}".format(datetime.datetime.now(),orientation))
             cv2.drawContours(frame, [rect], -1, 255, 2)
-
         cv2.imshow("warp", warp_frame)
 
-    # SIFT_check(warp_frame)
-    # cv2.imshow("res", DoB)
+    # print((MID_BUTTON_PRESENT and MONITOR_PRESENT and SCREEN_PRESENT))
+    return ((MID_BUTTON_PRESENT and MONITOR_PRESENT and SCREEN_PRESENT), UPRIGHT)
+    # print ("button: {}; monitor: {}; screen: {}".format(MID_BUTTON_PRESENT, MONITOR_PRESENT, SCREEN_PRESENT))
     # cv2.imshow("mask", blue)
-    cv2.imshow("frame", frame)
+    # cv2.imshow("frame", frame)
     # cv2.imwrite(args["image"] + "mask.jpg", blue)
     # cv2.imwrite(args["image"] + "small_mask.jpg", warp)
     # cv2.imwrite(args["image"] + "detect.jpg", warp_frame)
@@ -184,8 +186,8 @@ def detect_screen_check(frame):
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     size = frame.shape[0] * frame.shape[1]
 
-    edges = cv2.Canny(gray, 90, 150)
-    kernel = np.ones((2,2),np.uint8)
+    edges = cv2.Canny(gray, 90, 180)
+    kernel = np.ones((3,3),np.uint8)
     edges = cv2.dilate(edges,kernel,iterations = 1)
     # opening = cv2.morphologyEx(edges, cv2.MORPH_OPEN, kernel)
 
@@ -196,11 +198,11 @@ def detect_screen_check(frame):
 
     if len(cnts) > 0:
         cnt = sorted(cnts, key = cv2.contourArea, reverse = True)[0]
-        cv2.drawContours(frame, [cnt], -1, 255, 2)
         peri = cv2.arcLength(cnt, True)
         approx = cv2.approxPolyDP(cnt, 0.03 * peri, True)
 
-        if (len(approx) == 4 and (size/3*2 < cv2.contourArea(cnt))):
+        if (3 <= len(approx) <= 10 and (size/3*2 < cv2.contourArea(cnt))):
+            cv2.drawContours(frame, [cnt], -1, 255, 2)
             return True
         # print(len(approx))
     return False
