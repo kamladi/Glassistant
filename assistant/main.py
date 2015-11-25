@@ -31,13 +31,28 @@ class Assistant:
         print "ste"
         print step
         if step == 0:
+            # STEP 0: INITIAL CHECK
             result = self.initial_check(cv_image)
         elif step == 1:
+             # STEP 1: CHECK MONITOR UPRIGHT
             print "initi setup"
             result = self.initial_setup(cv_image)
         elif step == 2:
-            print "OK"
-
+            # STEP 2: MONITOR ON RIGHT HAND, PALM UP
+        elif step == 3:
+            # STEP 3: DISTANCE BTWN CUFF AND WRIST
+        elif step == 4:
+            # STEP 4: STRAP TIGHTENED
+        elif step == 5:
+            # STEP 5: ELBOW ON SURFACE
+        elif step == 6:
+            # STEP 6: LEFT HAND ON HEART
+        elif step == 7:
+            # STEP 7: CUFF ON SAME LEVEL AS LEFT HAND / START MEASUREMENT
+        elif step == 8:
+            # STEP 8: ALL INDICATORS ON
+        elif step == 9:
+            # STEP 9: STABLE READING ON SCREEN
 
         return result
 
