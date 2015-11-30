@@ -53,7 +53,12 @@ class Assistant:
             # STEP 8: ALL INDICATORS ON
         elif step == 9:
             # STEP 9: STABLE READING ON SCREEN
-
+        else:
+            # Invalid step number
+            result = {
+                "warning": "Invalid step",
+                "next_step": -1
+            }
         return result
 
 
