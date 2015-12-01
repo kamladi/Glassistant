@@ -6,16 +6,17 @@ import time
 IMG_SCALE = 1
 
 def findLargestContour(img):
-	SMALLEST_AREA = 600
+	MIN_CONTOUR_AREA = 3000
+	MAX_CONTOUR_AREA = 10000
 	(contours,hierarchy) = cv2.findContours(img, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
 
 	# extract largest contour
-	maxArea = SMALLEST_AREA
+	maxArea = MIN_CONTOUR_AREA
 	largestContour = None
 	for i in range(len(contours)):
 		curContour = contours[i]
 		area = cv2.contourArea(curContour)
-		if(area > maxArea):
+		if(area > maxArea and area < MAX_CONTOUR_AREA):
 			maxArea = area
 			largestContour = curContour
 	return (largestContour, maxArea)
@@ -70,6 +71,7 @@ def extractContourInfo(contour, scale):
 
 	return (center, axisAngle)
 
+# returns of a list of the finger defects from the hand contour.
 def findFingertips(contour, scale):
 	convexHull = cv2.convexHull(contour, returnPoints = False)
 	defects = cv2.convexityDefects(contour, convexHull)
@@ -90,6 +92,7 @@ def findFingertips(contour, scale):
 			fingerFolds.append(far)
 	return fingerTips, fingerFolds
 
+# Returns the location of the end of the thumb from a hand contour.
 def findThumb(fingerTips, fingerFolds):
 	maxFingerDepth = -1
 	maxFingerDepth_finger = None
@@ -109,28 +112,39 @@ def findThumb(fingerTips, fingerFolds):
 			else:
 				maxFingerDepth_finger = fingerTips[i][0]
 				maxFingerDepth = distToEnd
-	return maxFingerDepth_finger
+	return (maxFingerDepth_finger)
 
-def isHandUp(fingerFolds, center):
+# Determine if hand is facing up or down.
+# collects the "mean" of the finger defects, and checks if it is
+#		above or below the center of the hand.
+def isHandUp(fingerTips, center):
 	# collect the mean of the finger fold points
-	numFingerFolds = len(fingerFolds)
+	numFingerFolds = len(fingerTips)
 	sum = (0.0,0.0)
-	for fingerFold in fingerFolds:
-		sum = np.add(sum, fingerFold)
+	for (start,end) in fingerTips:
+		sum = np.add(sum, start)
 	meanFingerFold = (sum[0] / numFingerFolds, sum[1] / numFingerFolds)
 
 	# hand is upright if the mean fingerfold is
 	# above the center of the hand
 	return meanFingerFold[1] < center[1]
 
-def process_frame(img):
+
+
+# DETECT_HAND main hand detection function.
+def detect_hand(img, debug=False):
+	print "HASDFASDVARE"
 	# Get image dimensions.
 	HEIGHT, WIDTH, _ = img.shape
-	M = cv2.getRotationMatrix2D((WIDTH/2,HEIGHT/2),35,1)
-	img = cv2.warpAffine(img,M,(WIDTH,HEIGHT))
-	#img = cv2.resize(img, (HEIGHT/3,WIDTH/3))
-	cv2.imshow('img', img)
-	time.sleep(2)
+	#M = cv2.getRotationMatrix2D((WIDTH/2,HEIGHT/2),35,1)
+	#img = cv2.warpAffine(img,M,(WIDTH,HEIGHT))
+	#img = cv2.resize(img, (WIDTH/3,HEIGHT/3))
+	#HEIGHT, WIDTH, _ = img.shape
+	#img = img[HEIGHT/5:4*HEIGHT/5,WIDTH/5:4*WIDTH/5]
+
+	if debug:
+		cv2.imshow('img', img)
+		cv2.waitKey(0)
 
 	# Add initial contrast to img.
 	#mul = cv2.multiply(img, np.array(2.0))
@@ -138,33 +152,39 @@ def process_frame(img):
 	# Convert to HSV and blur.
 	#gray = cv2.cvtColor(mul, cv2.COLOR_BGR2GRAY)
 	gray = cv2.cvtColor(mul, cv2.COLOR_BGR2HSV)
-	blur = cv2.GaussianBlur(gray, (35,35),0)
-	cv2.imshow('img', blur)
-	cv2.waitKey(1)
-	time.sleep(2)
+	#blur = cv2.GaussianBlur(gray, (10,10),0)
+	blur = gray
 
-	lower_thresh = np.array([0, 40, 60])
-	upper_thresh = np.array([20, 150, 255])
+	if debug:
+		cv2.imshow('img', blur)
+		cv2.waitKey(0)
+
+	# lower_thresh = np.array([0, 40, 60])
+	# upper_thresh = np.array([20, 150, 255])
+	lower_thresh = np.array([0, 70, 0])
+	upper_thresh = np.array([30, 171, 255])
 	#lower_thresh1 = np.array([0, 0, 0])
 	#upper_thresh1 = np.array([100, 100, 100])
 
 	mask = cv2.inRange(blur, lower_thresh, upper_thresh)
 	#_, mask = cv2.threshold(blur, 127, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
-	cv2.imshow('img', mask)
-	cv2.waitKey(1)
-	time.sleep(2)
+	if debug:
+		cv2.imshow('img', mask)
+		cv2.waitKey(0)
 	#mask1 = cv2.inRange(blur, lower_thresh1, upper_thresh1)
 
 	# remove noise
+	#kernel = np.ones((5,5),np.uint8)
 	kernel = np.ones((5,5),np.uint8)
 	hand_img = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
 
 
 	(contour, contour_area) = findLargestContour(hand_img)
+	print "contour area: ", contour_area
 	if contour is None:
-		print "unable to find contour"
-		return
-	print "hand area: ", contour_area
+		warning = "unable to find contour"
+		return warning
+
 	hull = cv2.convexHull(contour)
 
 	print "hull length: %s" % len(hull)
@@ -173,14 +193,17 @@ def process_frame(img):
 	(center, axisAngle) = extractContourInfo(contour, IMG_SCALE)
 	print "(center, axisAngle) = ", center, axisAngle
 
-	# draw contour and convex hull
-	drawing = np.zeros(img.shape, np.uint8)
-	cv2.circle(drawing, center, 10, (255,255,255), -1)
-	cv2.drawContours(drawing, [contour],0,(0,255,0),2)
-	cv2.drawContours(drawing, [hull],0,(0,0,255),2)
-	cv2.circle(img,center,5,[0,0,255],-1)
-	(x,y),(MA,ma),angle = cv2.fitEllipse(contour)
-	print "angle = %f" % angle
+	if debug:
+		# draw contour and convex hull
+		drawing = np.zeros(img.shape, np.uint8)
+		cv2.circle(drawing, center, 10, (255,255,255), -1)
+		cv2.drawContours(drawing, [contour],0,(0,255,0),2)
+		cv2.drawContours(drawing, [hull],0,(0,0,255),2)
+		cv2.circle(img,center,5,[0,0,255],-1)
+		(x,y),(MA,ma),angle = cv2.fitEllipse(contour)
+		print "angle = %f" % angle
+
+
 	fingerTips, fingerFolds = findFingertips(contour, IMG_SCALE)
 
 	# for i in xrange(len(fingerTips)):
@@ -193,12 +216,20 @@ def process_frame(img):
 
 	thumbPt = findThumb(fingerTips, fingerFolds)
 	if thumbPt:
-		print "Thumb Pt: ", thumbPt
+		if debug:
+			cv2.circle(drawing,thumbPt,15,[255,0,0],-1)
+			#[vx,vy,x,y] = cv2.fitLine(contour, cv2.cv.CV_DIST_L2,0,0.01,0.01)
+			#lefty = int((-x*vy/vx) + y)
+			#righty = int(((WIDTH-x)*vy/vx)+y)
+			#cv2.line(drawing,(WIDTH-1,righty),(0,lefty),(0,255,0),2)
+			cv2.imshow('img', drawing)
+			cv2.waitKey(0)
 		distCenterToThumb = np.linalg.norm(np.subtract(thumbPt, center))
-		if distCenterToThumb < 200 or 500 < distCenterToThumb:
-			print "invalid thumb location"
-			return
-		handUp = isHandUp(fingerFolds, center)
+		print "thumb dist: ", distCenterToThumb
+		if distCenterToThumb < 85 or 250 < distCenterToThumb:
+			warning = "invalid thumb location"
+			return warning
+		handUp = isHandUp(fingerTips, center)
 		if handUp:
 			if thumbPt[0] < center[0]:
 				print "HAND UP, THUMB ON LEFT => PALM DOWN"
@@ -209,16 +240,9 @@ def process_frame(img):
 				print "HAND DOWN, THUMB ON LEFT => PALM UP"
 			else:
 				print "HAND DOWN, THUMB ON RIGHT => PALM DOWN"
-
-		cv2.circle(drawing,thumbPt,15,[255,0,0],-1)
-		[vx,vy,x,y] = cv2.fitLine(contour, cv2.cv.CV_DIST_L2,0,0.01,0.01)
-		lefty = int((-x*vy/vx) + y)
-		righty = int(((WIDTH-x)*vy/vx)+y)
-		cv2.line(drawing,(WIDTH-1,righty),(0,lefty),(0,255,0),2)
-		cv2.imshow('img', drawing)
-		cv2.waitKey(0)
-		time.sleep(1)
+		return None # sucess, no error message
 	else: # no thumb found
-		print "no thumb found"
+		warning = "no thumb found"
+		return warning
 
 

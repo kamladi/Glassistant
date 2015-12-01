@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import math
 import time
-from imglib import *
+from handrecog import detect_hand
 
 VIDEO_MODE = False
 
@@ -18,7 +18,9 @@ def main():
 
 				#fgmask = fgbg.apply(frame)
 				#cv2.imshow('frame', fgmask)
-				process_frame(img)
+				warning = detect_hand(img, True)
+				if warning:
+					print warning
 				if cv2.waitKey(1) & 0xFF == ord('q'):
 					break
 			counter = counter + 1
@@ -26,8 +28,10 @@ def main():
 		# video_capture.release()
 		# cv2.destroyAllWindows()
 	else:
-		img = cv2.imread('hand.jpg', cv2.IMREAD_COLOR)
-		process_frame(img)
+		img = cv2.imread('hand_large_lowres.jpg', cv2.IMREAD_COLOR)
+		warning = detect_hand(img, True)
+		if warning:
+			print warning
 		cv2.waitKey(1)
 
 if __name__ == '__main__':

@@ -3,6 +3,8 @@ import cv2
 import numpy as np
 import pickle
 from instruction_messages import INSTRUCTIONS
+from hand_detection.handrecog import detect_hand
+from device_detection.obj_track import detect_monitor
 from cv_pickle import CVPickle
 
 class CVError(Exception):
@@ -36,11 +38,22 @@ class Assistant:
         elif step == 1:
              # STEP 1: CHECK MONITOR UPRIGHT
             print "initial setup"
-            result = self.initial_setup(cv_image)
+            warning = detect_monitor(cv_image)
+	    if warning is None:
+                result["next_step"] = step + 1
+                result["message"] = INSTRUCTIONS[step + 1]
+            else:
+                result["next_step"] = step
+                result["message"] = warning
         elif step == 2:
             # STEP 2: MONITOR ON RIGHT HAND, PALM UP
-            result["next_step"] = step + 1
-            result["message"] = INSTRUCTIONS[step + 1]
+            warning = detect_hand(cv_image)
+            if warning is None:
+                result["next_step"] = step + 1
+                result["message"] = INSTRUCTIONS[step + 1]
+            else:
+                result["next_step"] = step
+                result["message"] = warning
         elif step == 3:
             # STEP 3: DISTANCE BTWN CUFF AND WRIST
             result["next_step"] = step + 1
