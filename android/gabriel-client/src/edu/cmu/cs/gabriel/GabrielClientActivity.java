@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 import java.util.Timer;
@@ -377,9 +378,12 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
 					System.out.print(len);
 					Log.d("ILTER", "New Step: " + newStep);
 
-					if (!ttsMessage.equals(stateTracker.getCurrentText())) {
+					if (!ttsMessage.equals(stateTracker.getCurrentText()) || 
+							(ttsMessage.equals(stateTracker.getCurrentText()) && 
+									(Calendar.getInstance().getTimeInMillis() - 10000) > stateTracker.getLastPlayedTime().getTimeInMillis())) {
 						Log.d("ILTER", "Speaking " + ttsMessage);
 						stateTracker.setCurrentText(ttsMessage);
+						stateTracker.setLastPlayedTime(Calendar.getInstance());
 						Log.d(LOG_TAG, "tts string origin: " + ttsMessage);
 						String[] words = ttsMessage.split(" "); 
 						mTTS.setSpeechRate(1f);
