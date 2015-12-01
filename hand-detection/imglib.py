@@ -18,7 +18,7 @@ def findLargestContour(img):
 		if(area > maxArea):
 			maxArea = area
 			largestContour = curContour
-	return largestContour
+	return (largestContour, maxArea)
 
 
 def calculateTilt(m11, m20, m02):
@@ -160,10 +160,11 @@ def process_frame(img):
 	hand_img = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
 
 
-	contour = findLargestContour(hand_img)
+	(contour, contour_area) = findLargestContour(hand_img)
 	if contour is None:
 		print "unable to find contour"
 		return
+	print "hand area: ", contour_area
 	hull = cv2.convexHull(contour)
 
 	print "hull length: %s" % len(hull)
