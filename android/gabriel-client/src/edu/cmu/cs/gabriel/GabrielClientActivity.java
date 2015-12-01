@@ -13,12 +13,7 @@ import java.util.TimerTask;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import edu.cmu.cs.gabriel.R;
-import edu.cmu.cs.gabriel.network.AccStreamingThread;
-import edu.cmu.cs.gabriel.network.NetworkProtocol;
-import edu.cmu.cs.gabriel.network.ResultReceivingThread;
-import edu.cmu.cs.gabriel.network.VideoStreamingThread;
-import edu.cmu.cs.gabriel.token.TokenController;
+import com.google.android.glass.view.WindowUtils;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -26,11 +21,11 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.hardware.Camera;
+import android.hardware.Camera.PreviewCallback;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.hardware.Camera.PreviewCallback;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -40,11 +35,13 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.TextView;
-import android.widget.Toast;
+import edu.cmu.cs.gabriel.network.AccStreamingThread;
+import edu.cmu.cs.gabriel.network.NetworkProtocol;
+import edu.cmu.cs.gabriel.network.ResultReceivingThread;
+import edu.cmu.cs.gabriel.network.VideoStreamingThread;
+import edu.cmu.cs.gabriel.token.TokenController;
 
 public class GabrielClientActivity extends Activity implements TextToSpeech.OnInitListener, SensorEventListener {
 	
@@ -83,11 +80,15 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
 	protected void onCreate(Bundle savedInstanceState) {
 		Log.d(DEBUG_TAG, "on onCreate");
 		super.onCreate(savedInstanceState);
+		
+		// Requests a voice menu on this activity.
+		getWindow().requestFeature(WindowUtils.FEATURE_VOICE_COMMANDS);
+		
 		setContentView(R.layout.activity_main);
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED+
                 WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON+
                 WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);		
-	
+		
 		
 		// Connect to Gabriel Server if it's not experiment
 		if (Const.IS_EXPERIMENT == false){
@@ -97,6 +98,39 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
 			init_experiement();			
 		}
 	}
+	
+	@Override
+    public boolean onCreatePanelMenu(int featureId, Menu menu) {
+        if (featureId == WindowUtils.FEATURE_VOICE_COMMANDS) {
+            getMenuInflater().inflate(R.menu.main, menu);
+            return true;
+        }
+        // Pass through to super to setup touch menu.
+        return super.onCreatePanelMenu(featureId, menu);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onMenuItemSelected(int featureId, MenuItem item) {
+        if (featureId == WindowUtils.FEATURE_VOICE_COMMANDS) {
+            switch (item.getItemId()) {
+                case R.id.action_ok:
+                	Log.d(DEBUG_TAG, "Received voice command");
+                	stateTracker.updateState(stateTracker.getCurrentStep()+1);
+                	Log.d(DEBUG_TAG, "Updated state. Current step is: "+stateTracker.getCurrentStep());
+                    break;
+                default:
+                    return true;
+            }
+            return true;
+        }
+        return super.onMenuItemSelected(featureId, item);
+    }
 
 	boolean experimentStarted = false;
 	public void startExperiment(View view) {
@@ -110,7 +144,7 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
 	protected void runExperiements(){
 		final Timer startTimer = new Timer();
 		TimerTask autoStart = new TimerTask(){
-			String[] ipList = {"128.2.213.104"};	//"54.203.73.67" 
+			String[] ipList = {"128.237.176.143"};
 //			int[] tokenSize = {1};
 			int[] tokenSize = {10000};
 			int ipIndex = 0;
@@ -312,6 +346,7 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
 
 	private Handler returnMsgHandler = new Handler() {
 		public void handleMessage(Message msg) {
+			Log.d(DEBUG_TAG, "Message Received: "+(String)msg.obj);
 			if (msg.what == NetworkProtocol.NETWORK_RET_FAILED) {
 				Bundle data = msg.getData();
 				String message = data.getString("message");

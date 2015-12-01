@@ -17,7 +17,7 @@ public class Const {
 	public static File TEST_IMAGE_DIR = new File (ROOT_DIR.getAbsolutePath() + File.separator + "images" + File.separator);	
 	
 	// control VM
-	public static String GABRIEL_IP = "54.88.45.254";	// Cloudlet
+	public static String GABRIEL_IP = "128.237.176.143";	// Ubuntu VM
 //	public static String GABRIEL_IP = "54.203.73.67";	// Amazon West
 	
 	// Token
