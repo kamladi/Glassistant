@@ -2,6 +2,7 @@ import sys
 import cv2
 import numpy as np
 import pickle
+from instruction_messages import INSTRUCTIONS
 from cv_pickle import CVPickle
 
 class CVError(Exception):
@@ -28,35 +29,55 @@ class Assistant:
 
         result = {}
         step = int(float(step))
-        print "ste"
-        print step
+        print "step ", step
         if step == 0:
             # STEP 0: INITIAL CHECK
             result = self.initial_check(cv_image)
         elif step == 1:
              # STEP 1: CHECK MONITOR UPRIGHT
-            print "initi setup"
+            print "initial setup"
             result = self.initial_setup(cv_image)
         elif step == 2:
             # STEP 2: MONITOR ON RIGHT HAND, PALM UP
+            result["next_step"] = step + 1
+            result["message"] = INSTRUCTIONS[step + 1]
         elif step == 3:
             # STEP 3: DISTANCE BTWN CUFF AND WRIST
+            result["next_step"] = step + 1
+            result["message"] = INSTRUCTIONS[step + 1]
         elif step == 4:
             # STEP 4: STRAP TIGHTENED
+            # Stay on current step, client will skip step when user says "OK"
+            result["next_step"] = step
+            result["message"] = INSTRUCTIONS[step]
         elif step == 5:
             # STEP 5: ELBOW ON SURFACE
+            # Stay on current step, client will skip step when user says "OK"
+            result["next_step"] = step
+            result["message"] = INSTRUCTIONS[step]
         elif step == 6:
             # STEP 6: LEFT HAND ON HEART
+            # Stay on current step, client will skip step when user says "OK"
+            result["next_step"] = step
+            result["message"] = INSTRUCTIONS[step]
         elif step == 7:
             # STEP 7: CUFF ON SAME LEVEL AS LEFT HAND / START MEASUREMENT
+            # Stay on current step, client will skip step when user says "OK"
+            result["next_step"] = step
+            result["message"] = INSTRUCTIONS[step]
         elif step == 8:
             # STEP 8: ALL INDICATORS ON
+            # Stay on current step, client will skip step when user says "OK"
+            result["next_step"] = step
+            result["message"] = INSTRUCTIONS[step]
         elif step == 9:
             # STEP 9: STABLE READING ON SCREEN
+            result["next_step"] = step + 1
+            result["message"] = INSTRUCTIONS[step + 1]
         else:
             # Invalid step number
             result = {
-                "warning": "Invalid step",
+                "message": "Invalid step",
                 "next_step": -1
             }
         return result
@@ -67,12 +88,12 @@ class Assistant:
         step = int(float(header["step"]))
 
         if step == 0:
-            result = {  "warning" : "Room looks good.",
+            result = {  "message" : "Room looks good.",
                       "next_step" : 1 }
 
         elif step == 1:
             print "initial setup"
-            result = {  "warning": "Device looks okay. Please put it on your arm.",
+            result = {  "message": "Device looks okay. Please put it on your arm.",
                           "next_step": 1 }
         elif step == 2:
             print "OK"
@@ -88,14 +109,14 @@ class Assistant:
         ## TODO: check for noise
 
         if avr < 55:
-            return {  "warning" : "Light not good enough.",
+            return {  "message" : "Light not good enough.",
                       "next_step" : 0,
               "debug": avr }
         else:
-            return {  "warning" : "Room looks good.",
+            return {  "message" : "Room looks good.",
                       "next_step" : 1 }
 
-        return { "warning" : "There is a problem with the application.",
+        return { "message" : "There is a problem with the application.",
                  "next_step" : -1 }
 
 
@@ -132,8 +153,8 @@ class Assistant:
 
     def initial_setup(self, img):
 
-        # default warning
-        warning = "Please make sure that you are holding the device upright \
+        # default message
+        message = "Please make sure that you are holding the device upright \
                     and to the center of your eyesight."
 
         try:
@@ -184,14 +205,14 @@ class Assistant:
             x4,y4 = corners[3]
 
             if y1 > y4 or y2 > y3:
-                warning = "Incorrect device orientation"
+                message = "Incorrect device orientation"
                 raise CVError("Could not find Homography")
             else:
-                return {  "warning": "Device looks okay. Please put it on your arm.",
+                return {  "message": "Device looks okay. Please put it on your arm.",
                           "next_step": 1 }
 
         except CVError as e:
             print e
-            return {  "warning": warning,
+            return {  "message": message,
                       "next_step": 1  }
 
