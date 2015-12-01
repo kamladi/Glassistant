@@ -6,6 +6,7 @@ import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Timer;
@@ -32,6 +33,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
+import android.speech.tts.UtteranceProgressListener;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -362,12 +364,11 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
 
 					try {
 						JSONObject returnObj= new JSONObject((String) msg.obj);
-						ttsMessage = returnObj.getString("warning");
+						ttsMessage = returnObj.getString("message");
 						int nextStep = returnObj.getInt("next_step");
 //						if (nextStep != stateTracker.getCurrentStep()) {
 //							newStep = true;
 //						}
-						stateTracker.updateState(nextStep);
 						
 					} catch (JSONException e) {
 						// TODO Auto-generated catch block
@@ -376,32 +377,90 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
 
 					int len = TextToSpeech.getMaxSpeechInputLength();
 					System.out.print(len);
+					
+					HashMap<String, String> map = new HashMap<String, String>();
+					map.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "LastWord");
+					
 					Log.d("ILTER", "New Step: " + newStep);
 
 					if (!ttsMessage.equals(stateTracker.getCurrentText()) || 
 							(ttsMessage.equals(stateTracker.getCurrentText()) && 
-									(Calendar.getInstance().getTimeInMillis() - 10000) > stateTracker.getLastPlayedTime().getTimeInMillis())) {
+									(Calendar.getInstance().getTimeInMillis() - 20000) > stateTracker.getLastPlayedTime().getTimeInMillis())) {
 						Log.d("ILTER", "Speaking " + ttsMessage);
 						stateTracker.setCurrentText(ttsMessage);
-						stateTracker.setLastPlayedTime(Calendar.getInstance());
+						
 						Log.d(LOG_TAG, "tts string origin: " + ttsMessage);
 						String[] words = ttsMessage.split(" "); 
-						mTTS.setSpeechRate(1f);
+						mTTS.setSpeechRate(2f);
+						mTTS.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+							
+							@Override
+							public void onDone(String utteranceId) {
+								Log.d(DEBUG_TAG, "Message played.");
+//								try {
+//									Thread.sleep(5000);
+//								} catch (InterruptedException e) {
+//									e.printStackTrace();
+//								}
+								//stateTracker.updateState(stateTracker.getCurrentStep()+1);
+								//stateTracker.setLastPlayedTime(Calendar.getInstance());
+							}
+
+							@Override
+							public void onError(String utteranceId) {}
+
+							@Override
+							public void onStart(String utteranceId) {}
+						});
 						for (int i=0; i < words.length; i++) {
 							
 							int queuConstant = TextToSpeech.QUEUE_ADD;
 							if (i == 0) {
 								queuConstant = TextToSpeech.QUEUE_FLUSH;
 							}
-							
+							if(i == (words.length-1)){
+								mTTS.speak(words[i], queuConstant, map);
+								break;
+							}
 							mTTS.speak(words[i], queuConstant, null);
+							
 						}
 					}
 				}
 			}
 		}
 	};
+	
+	public static class CustomUtteranceProgressListener extends UtteranceProgressListener{
+		
+		private String sentence = null;
+		private int noOfUtterances = 0;
+		private int currentUtterance = 0;
+		private int step = -1;
+		private GlassistantStateTracker tracker = null;
+		
+		public CustomUtteranceProgressListener(String sentence, int noOfUtterances, int step, GlassistantStateTracker tracker) {
+			this.noOfUtterances = noOfUtterances;
+			this.sentence = sentence;
+			this.step = step;
+			this.tracker = tracker;
+		}
 
+		@Override
+		public void onDone(String utteranceId) {
+			if(this.currentUtterance == this.noOfUtterances){
+				this.tracker.updateState(tracker.getCurrentStep()+1);
+				this.tracker.
+			}
+		}
+
+		@Override
+		public void onError(String utteranceId) {}
+
+		@Override
+		public void onStart(String utteranceId) {}
+		
+	}
 
 	protected int selectedRangeIndex = 0;
 

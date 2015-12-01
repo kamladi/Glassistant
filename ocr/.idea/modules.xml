@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/../../../11-676-BigData/Mid-term/11676MidTerm/.idea/11676MidTerm.iml" filepath="$PROJECT_DIR$/../../../11-676-BigData/Mid-term/11676MidTerm/.idea/11676MidTerm.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../display_ocr-master/.idea/display_ocr-master.iml" filepath="$PROJECT_DIR$/../display_ocr-master/.idea/display_ocr-master.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/ocr.iml" filepath="$PROJECT_DIR$/.idea/ocr.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../ocr2.7/.idea/ocr2.7.iml" filepath="$PROJECT_DIR$/../ocr2.7/.idea/ocr2.7.iml" />
+    </modules>
+  </component>
+</project>
