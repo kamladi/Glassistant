@@ -36,7 +36,7 @@ class Assistant:
             # STEP 0: INITIAL CHECK
 			print "initial check"
             warning = self.initial_check(cv_image)
-			if warning is None:
+	    if warning is None:
                 result["next_step"] = step + 1
                 result["message"] = INSTRUCTIONS[step + 1]
             else:
@@ -46,7 +46,7 @@ class Assistant:
              # STEP 1: CHECK MONITOR UPRIGHT
             print "detect monitor"
             warning = detect_monitor(cv_image)
-			if warning is None:
+	    if warning is None:
                 result["next_step"] = step + 1
                 result["message"] = INSTRUCTIONS[step + 1]
             else:
