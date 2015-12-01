@@ -38,7 +38,13 @@ class Assistant:
         elif step == 1:
              # STEP 1: CHECK MONITOR UPRIGHT
             print "initial setup"
-            result = detect_monitor(cv_image)
+            warning = detect_monitor(cv_image)
+	    if warning is None:
+                result["next_step"] = step + 1
+                result["message"] = INSTRUCTIONS[step + 1]
+            else:
+                result["next_step"] = step
+                result["message"] = warning
         elif step == 2:
             # STEP 2: MONITOR ON RIGHT HAND, PALM UP
             warning = detect_hand(cv_image)
