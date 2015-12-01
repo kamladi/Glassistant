@@ -34,12 +34,19 @@ class Assistant:
         print "step ", step
         if step == 0:
             # STEP 0: INITIAL CHECK
-            result = self.initial_check(cv_image)
+			print "initial check"
+            warning = self.initial_check(cv_image)
+			if warning is None:
+                result["next_step"] = step + 1
+                result["message"] = INSTRUCTIONS[step + 1]
+            else:
+                result["next_step"] = step
+                result["message"] = warning
         elif step == 1:
              # STEP 1: CHECK MONITOR UPRIGHT
-            print "initial setup"
+            print "detect monitor"
             warning = detect_monitor(cv_image)
-	    if warning is None:
+			if warning is None:
                 result["next_step"] = step + 1
                 result["message"] = INSTRUCTIONS[step + 1]
             else:
@@ -122,15 +129,9 @@ class Assistant:
         ## TODO: check for noise
 
         if avr < 55:
-            return {  "message" : "Light not good enough.",
-                      "next_step" : 0,
-              "debug": avr }
+            return "Light not good enough"
         else:
-            return {  "message" : "Room looks good.",
-                      "next_step" : 1 }
-
-        return { "message" : "There is a problem with the application.",
-                 "next_step" : -1 }
+            return None
 
 
     def filter_matches(self, kp1, kp2, matches, ratio = 0.75):
