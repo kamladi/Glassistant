@@ -181,7 +181,7 @@ def detect_hand(img, debug=False):
 	(contour, contour_area) = findLargestContour(hand_img)
 	print "contour area: ", contour_area
 	if contour is None:
-		warning = "unable to find contour"
+		warning = "Unable to find hand. Try moving your hand further away, or moving to a clean surface."
 		return warning
 
 	hull = cv2.convexHull(contour)
@@ -232,13 +232,18 @@ def detect_hand(img, debug=False):
 		if handUp:
 			if thumbPt[0] < center[0]:
 				print "HAND UP, THUMB ON LEFT => PALM DOWN"
+				return "Left hand detected. Use your right hand instead."
 			else:
+				# SUCCESS
 				print "HAND UP, THUMB ON RIGHT => PALM UP"
+				return None
 		else:
 			if thumbPt[0] < center[0]:
 				print "HAND DOWN, THUMB ON LEFT => PALM UP"
+				return "Hand is upside-down. Hand should be face up, palm up."
 			else:
 				print "HAND DOWN, THUMB ON RIGHT => PALM DOWN"
+				return "Hand is upside-down. Hand should be face up, palm up."
 		return None # sucess, no error message
 	else: # no thumb found
 		warning = "no thumb found"
