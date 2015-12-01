@@ -36,7 +36,7 @@ from gabriel.common.config import Const
 from assistant.main import Assistant
 
 class DummyVideoApp(AppProxyThread):
-    def setTestMode(test_mode=False):
+    def setTestMode(self, test_mode=False):
         self.test_mode = test_mode
 
     def handle(self, header, data):

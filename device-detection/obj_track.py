@@ -74,7 +74,7 @@ def warpFrame(frame, rect, mask):
 
 def detect_monitor(frame):
     # Takes in a frame
-    # returns (is the monitor present, is the monitor upright)
+    # returns two booleans: (is the monitor present, is the monitor upright)
     MONITOR_PRESENT = False
     MID_BUTTON_PRESENT = False
     UPRIGHT = False
@@ -142,8 +142,7 @@ def detect_monitor(frame):
 
         # check if it's the middle button
         if len(possible_button) == 0:
-            pass
-            # print "Error: no button found!"
+            return "Error: no button found!"
         else:
             for button in possible_button:
                 center = button[0]
@@ -165,12 +164,15 @@ def detect_monitor(frame):
                         MID_BUTTON_PRESENT = True
             # cv2.imshow("warp_frame", warp_frame)
 
+
     if (MID_BUTTON_PRESENT and MONITOR_PRESENT):
         # double check if the monitor is present by checking if there's a screen on the monitor
         SCREEN_PRESENT = detect_screen_check(warp_frame)
         if (SCREEN_PRESENT):
-            print("{:%Y-%b-%d %H:%M:%S}: detect monitor at orientation: {}".format(datetime.datetime.now(),orientation))
+            # print("{:%Y-%b-%d %H:%M:%S}: detect monitor at orientation: {}".format(datetime.datetime.now(),orientation))
             cv2.drawContours(frame, [rect], -1, 255, 2)
+        else: 
+            return "No screen detected on the monitor. Monitor might not be present"
         cv2.imshow("warp", warp_frame)
 
     # print((MID_BUTTON_PRESENT and MONITOR_PRESENT and SCREEN_PRESENT))
