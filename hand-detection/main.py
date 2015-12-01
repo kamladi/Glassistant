@@ -28,7 +28,7 @@ def main():
 		# video_capture.release()
 		# cv2.destroyAllWindows()
 	else:
-		img = cv2.imread('hand_med.jpg', cv2.IMREAD_COLOR)
+		img = cv2.imread('hand_large_lowres.jpg', cv2.IMREAD_COLOR)
 		warning = detect_hand(img, True)
 		if warning:
 			print warning

@@ -6,8 +6,8 @@ import time
 IMG_SCALE = 1
 
 def findLargestContour(img):
-	MIN_CONTOUR_AREA = 8000
-	MAX_CONTOUR_AREA = 66000
+	MIN_CONTOUR_AREA = 3000
+	MAX_CONTOUR_AREA = 10000
 	(contours,hierarchy) = cv2.findContours(img, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
 
 	# extract largest contour
@@ -138,9 +138,9 @@ def detect_hand(img, debug=False):
 	HEIGHT, WIDTH, _ = img.shape
 	#M = cv2.getRotationMatrix2D((WIDTH/2,HEIGHT/2),35,1)
 	#img = cv2.warpAffine(img,M,(WIDTH,HEIGHT))
-	img = cv2.resize(img, (WIDTH/3,HEIGHT/3))
-	HEIGHT, WIDTH, _ = img.shape
-	img = img[HEIGHT/5:4*HEIGHT/5,WIDTH/5:4*WIDTH/5]
+	#img = cv2.resize(img, (WIDTH/3,HEIGHT/3))
+	#HEIGHT, WIDTH, _ = img.shape
+	#img = img[HEIGHT/5:4*HEIGHT/5,WIDTH/5:4*WIDTH/5]
 
 	if debug:
 		cv2.imshow('img', img)
@@ -152,7 +152,8 @@ def detect_hand(img, debug=False):
 	# Convert to HSV and blur.
 	#gray = cv2.cvtColor(mul, cv2.COLOR_BGR2GRAY)
 	gray = cv2.cvtColor(mul, cv2.COLOR_BGR2HSV)
-	blur = cv2.GaussianBlur(gray, (35,35),0)
+	#blur = cv2.GaussianBlur(gray, (10,10),0)
+	blur = gray
 
 	if debug:
 		cv2.imshow('img', blur)
@@ -173,11 +174,13 @@ def detect_hand(img, debug=False):
 	#mask1 = cv2.inRange(blur, lower_thresh1, upper_thresh1)
 
 	# remove noise
+	#kernel = np.ones((5,5),np.uint8)
 	kernel = np.ones((5,5),np.uint8)
 	hand_img = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
 
 
 	(contour, contour_area) = findLargestContour(hand_img)
+	print "contour area: ", contour_area
 	if contour is None:
 		warning = "unable to find contour"
 		return warning
