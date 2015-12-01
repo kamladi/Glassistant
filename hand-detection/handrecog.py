@@ -237,7 +237,7 @@ def detect_hand(img, debug=False):
 				print "HAND DOWN, THUMB ON LEFT => PALM UP"
 			else:
 				print "HAND DOWN, THUMB ON RIGHT => PALM DOWN"
-
+		return None # sucess, no error message
 	else: # no thumb found
 		warning = "no thumb found"
 		return warning
