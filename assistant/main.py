@@ -91,10 +91,10 @@ class Assistant:
             # Stay on current step, client will skip step when user says "OK"
             result["next_step"] = step
             result["message"] = INSTRUCTIONS[step]
-        # elif step == 9:
-        #     # STEP 9: STABLE READING ON SCREEN
-        #     result["next_step"] = step + 1
-        #     result["message"] = INSTRUCTIONS[step + 1]
+        elif step == 9:
+            # STEP 9: STABLE READING ON SCREEN
+            result["next_step"] = step
+            result["message"] = INSTRUCTIONS[step]
         else:
             # Invalid step number
             result = {
