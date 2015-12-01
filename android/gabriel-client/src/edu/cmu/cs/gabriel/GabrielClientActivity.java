@@ -295,6 +295,31 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
 			if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
 				Log.e("krha_app", "Language is not available.");
 			}
+			mTTS.setSpeechRate(2f);
+			mTTS.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+				
+				@Override
+				public void onDone(String utteranceId) {
+					Log.d(DEBUG_TAG, "utterance played.");
+					if(utteranceId.equals("LastWord")){
+						Log.d(DEBUG_TAG, "Message played.");
+						try {
+							Thread.sleep(5000);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+						stateTracker.updateState(stateTracker.getNextStep());
+						stateTracker.setCurrentText(stateTracker.getNextText());
+						stateTracker.setLastPlayedTime(Calendar.getInstance());
+					}
+				}
+
+				@Override
+				public void onError(String utteranceId) {}
+
+				@Override
+				public void onStart(String utteranceId) {}
+			});
 		} else {
 			// Initialization failed.
 			Log.e("krha_app", "Could not initialize TextToSpeech.");
@@ -366,6 +391,7 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
 						JSONObject returnObj= new JSONObject((String) msg.obj);
 						ttsMessage = returnObj.getString("message");
 						int nextStep = returnObj.getInt("next_step");
+						stateTracker.setNextStep(nextStep);
 //						if (nextStep != stateTracker.getCurrentStep()) {
 //							newStep = true;
 //						}
@@ -387,31 +413,10 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
 							(ttsMessage.equals(stateTracker.getCurrentText()) && 
 									(Calendar.getInstance().getTimeInMillis() - 20000) > stateTracker.getLastPlayedTime().getTimeInMillis())) {
 						Log.d("ILTER", "Speaking " + ttsMessage);
-						stateTracker.setCurrentText(ttsMessage);
+						stateTracker.setNextText(ttsMessage);
 						
 						Log.d(LOG_TAG, "tts string origin: " + ttsMessage);
 						String[] words = ttsMessage.split(" "); 
-						mTTS.setSpeechRate(2f);
-						mTTS.setOnUtteranceProgressListener(new UtteranceProgressListener() {
-							
-							@Override
-							public void onDone(String utteranceId) {
-								Log.d(DEBUG_TAG, "Message played.");
-//								try {
-//									Thread.sleep(5000);
-//								} catch (InterruptedException e) {
-//									e.printStackTrace();
-//								}
-								//stateTracker.updateState(stateTracker.getCurrentStep()+1);
-								//stateTracker.setLastPlayedTime(Calendar.getInstance());
-							}
-
-							@Override
-							public void onError(String utteranceId) {}
-
-							@Override
-							public void onStart(String utteranceId) {}
-						});
 						for (int i=0; i < words.length; i++) {
 							
 							int queuConstant = TextToSpeech.QUEUE_ADD;
@@ -430,37 +435,6 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
 			}
 		}
 	};
-	
-	public static class CustomUtteranceProgressListener extends UtteranceProgressListener{
-		
-		private String sentence = null;
-		private int noOfUtterances = 0;
-		private int currentUtterance = 0;
-		private int step = -1;
-		private GlassistantStateTracker tracker = null;
-		
-		public CustomUtteranceProgressListener(String sentence, int noOfUtterances, int step, GlassistantStateTracker tracker) {
-			this.noOfUtterances = noOfUtterances;
-			this.sentence = sentence;
-			this.step = step;
-			this.tracker = tracker;
-		}
-
-		@Override
-		public void onDone(String utteranceId) {
-			if(this.currentUtterance == this.noOfUtterances){
-				this.tracker.updateState(tracker.getCurrentStep()+1);
-				this.tracker.
-			}
-		}
-
-		@Override
-		public void onError(String utteranceId) {}
-
-		@Override
-		public void onStart(String utteranceId) {}
-		
-	}
 
 	protected int selectedRangeIndex = 0;
 
