@@ -226,9 +226,9 @@ def detect_hand(img, debug=False):
 			cv2.waitKey(0)
 		distCenterToThumb = np.linalg.norm(np.subtract(thumbPt, center))
 		print "thumb dist: ", distCenterToThumb
-		if distCenterToThumb < 85 or 250 < distCenterToThumb:
-			warning = "invalid thumb location"
-			return warning
+		#if distCenterToThumb < 85 or 250 < distCenterToThumb:
+			#warning = "invalid thumb location"
+			#return warning
 		handUp = isHandUp(fingerTips, center)
 		if handUp:
 			if thumbPt[0] < center[0]:
