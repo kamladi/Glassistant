@@ -133,7 +133,6 @@ def isHandUp(fingerTips, center):
 
 # DETECT_HAND main hand detection function.
 def detect_hand(img, debug=False):
-	print "HASDFASDVARE"
 	# Get image dimensions.
 	HEIGHT, WIDTH, _ = img.shape
 	#M = cv2.getRotationMatrix2D((WIDTH/2,HEIGHT/2),35,1)
