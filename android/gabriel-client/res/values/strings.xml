@@ -9,4 +9,7 @@
     <!-- Glass Launch-related strings. -->
     <string name="start_gabriel_voice_trigger">start Glassistant</string>
     
+    <!-- Glassistant voice command related strings. -->
+    <string name="ok_glassistant_voice_command">OK Glassistant</string>
+    
 </resources>
