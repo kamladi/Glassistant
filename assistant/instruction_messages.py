@@ -7,7 +7,7 @@ INSTRUCTIONS = [
 	"Fasten the strap of the cuff. Say OK when you are done.",
 	"Place your left hand on your heart. Say OK when you are done.",
 	"Tilt the right forearm until the cuff is on the same level as your left hand. You can reomve your left hand from the heart after you are done. Say OK when you are done.",
-	"Press the large button to start measurement.",
-	"Measurement started."
+	"Press the large button to start measurement. Say OK when the numbers stop changing and the cuff loosens up.",
+	#"Measurement started."
 	"Measurement complete. You can turn it off by pressing the large button and take it off."
 ]

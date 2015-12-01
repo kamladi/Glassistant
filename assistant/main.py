@@ -56,8 +56,9 @@ class Assistant:
                 result["message"] = warning
         elif step == 3:
             # STEP 3: DISTANCE BTWN CUFF AND WRIST
-            result["next_step"] = step + 1
-            result["message"] = INSTRUCTIONS[step + 1]
+            # Stay on current step, client will skip step when user says "OK"
+            result["next_step"] = step
+            result["message"] = INSTRUCTIONS[step]
         elif step == 4:
             # STEP 4: STRAP TIGHTENED
             # Stay on current step, client will skip step when user says "OK"
@@ -79,14 +80,14 @@ class Assistant:
             result["next_step"] = step
             result["message"] = INSTRUCTIONS[step]
         elif step == 8:
-            # STEP 8: ALL INDICATORS ON
+            # STEP 8: ALL INDICATORS ON, STABLE READING ON SCREEN
             # Stay on current step, client will skip step when user says "OK"
             result["next_step"] = step
             result["message"] = INSTRUCTIONS[step]
-        elif step == 9:
-            # STEP 9: STABLE READING ON SCREEN
-            result["next_step"] = step + 1
-            result["message"] = INSTRUCTIONS[step + 1]
+        # elif step == 9:
+        #     # STEP 9: STABLE READING ON SCREEN
+        #     result["next_step"] = step + 1
+        #     result["message"] = INSTRUCTIONS[step + 1]
         else:
             # Invalid step number
             result = {
