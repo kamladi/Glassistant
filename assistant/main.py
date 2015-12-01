@@ -34,7 +34,7 @@ class Assistant:
         print "step ", step
         if step == 0:
             # STEP 0: INITIAL CHECK
-			print "initial check"
+	    print "initial check"
             warning = self.initial_check(cv_image)
 	    if warning is None:
                 result["next_step"] = step + 1
