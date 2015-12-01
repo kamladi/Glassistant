@@ -165,7 +165,7 @@ def detect_monitor(frame):
                         MID_BUTTON_PRESENT = True
             # cv2.imshow("warp_frame", warp_frame)
     else:
-        return "Warning: No contour detected in view"
+        return "message: No contour detected in view"
 
     if (MID_BUTTON_PRESENT and MONITOR_PRESENT):
         # double check if the monitor is present by checking if there's a screen on the monitor
@@ -174,7 +174,7 @@ def detect_monitor(frame):
             # print("{:%Y-%b-%d %H:%M:%S}: detect monitor at orientation: {}".format(datetime.datetime.now(),orientation))
             cv2.drawContours(frame, [rect], -1, 255, 2)
         else: 
-            return "Warning: No screen detected on the monitor. Monitor might not be present"
+            return "message: No screen detected on the monitor. Monitor might not be present"
         cv2.imshow("warp", warp_frame)
 
     # print((MID_BUTTON_PRESENT and MONITOR_PRESENT and SCREEN_PRESENT))
