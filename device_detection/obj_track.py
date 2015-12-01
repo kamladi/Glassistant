@@ -143,7 +143,7 @@ def detect_monitor(frame):
 
         # check if it's the middle button
         if len(possible_button) == 0:
-            return "Error: no button found!"
+            return "no button found!"
         else:
             for button in possible_button:
                 center = button[0]
@@ -165,7 +165,7 @@ def detect_monitor(frame):
                         MID_BUTTON_PRESENT = True
             # cv2.imshow("warp_frame", warp_frame)
     else:
-        return "message: No contour detected in view"
+        return "No contour detected in view"
 
     if (MID_BUTTON_PRESENT and MONITOR_PRESENT):
         # double check if the monitor is present by checking if there's a screen on the monitor
@@ -174,11 +174,12 @@ def detect_monitor(frame):
             # print("{:%Y-%b-%d %H:%M:%S}: detect monitor at orientation: {}".format(datetime.datetime.now(),orientation))
             cv2.drawContours(frame, [rect], -1, 255, 2)
         else: 
-            return "message: No screen detected on the monitor. Monitor might not be present"
+            return "No screen detected on the monitor. Monitor might not be present"
         cv2.imshow("warp", warp_frame)
 
     # print((MID_BUTTON_PRESENT and MONITOR_PRESENT and SCREEN_PRESENT))
-    return ((MID_BUTTON_PRESENT and MONITOR_PRESENT and SCREEN_PRESENT), UPRIGHT)
+    if (MID_BUTTON_PRESENT and MONITOR_PRESENT and SCREEN_PRESENT and UPRIGHT):
+        return None
     # print ("button: {}; monitor: {}; screen: {}".format(MID_BUTTON_PRESENT, MONITOR_PRESENT, SCREEN_PRESENT))
     # cv2.imshow("mask", blue)
     # cv2.imshow("frame", frame)
