@@ -8,6 +8,5 @@ INSTRUCTIONS = [
 	"Step 6: Place your left hand on your heart. Say OK when you are done.",
 	"Step 7: Tilt the right forearm until the cuff is on the same level as your left hand. You can reomve your left hand from the heart after you are done. Say OK when you are done.",
 	"Step 8: Press the large button to start measurement. Say OK when the numbers stop changing and the cuff loosens up.",
-	#"Measurement started."
 	"Measurement complete. You can turn it off by pressing the large button and take it off."
 ]

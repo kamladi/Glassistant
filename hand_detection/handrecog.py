@@ -5,12 +5,14 @@ import time
 
 IMG_SCALE = 1
 
-def findLargestContour(img):
+# Find contours in a thresholded image, and return the contour
+# most likely to be the hand (min and max contour areas based on 320x240 video frame)
+def findHandContour(img):
 	MIN_CONTOUR_AREA = 3000
 	MAX_CONTOUR_AREA = 10000
 	(contours,hierarchy) = cv2.findContours(img, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
 
-	# extract largest contour
+	# extract hand contour
 	maxArea = MIN_CONTOUR_AREA
 	largestContour = None
 	for i in range(len(contours)):
@@ -67,9 +69,9 @@ def extractContourInfo(contour, scale):
 	m11 = moments['m11']
 	m20 = moments['m20']
 	m02 = moments['m02']
-	axisAngle = calculateTilt(m11, m20, m02)
+	orientation = calculateTilt(m11, m20, m02)
 
-	return (center, axisAngle)
+	return (center, orientation)
 
 # returns of a list of the finger defects from the hand contour.
 def findFingertips(contour, scale):
@@ -135,11 +137,6 @@ def isHandUp(fingerTips, center):
 def detect_hand(img, debug=False):
 	# Get image dimensions.
 	HEIGHT, WIDTH, _ = img.shape
-	#M = cv2.getRotationMatrix2D((WIDTH/2,HEIGHT/2),35,1)
-	#img = cv2.warpAffine(img,M,(WIDTH,HEIGHT))
-	#img = cv2.resize(img, (WIDTH/3,HEIGHT/3))
-	#HEIGHT, WIDTH, _ = img.shape
-	#img = img[HEIGHT/5:4*HEIGHT/5,WIDTH/5:4*WIDTH/5]
 
 	if debug:
 		cv2.imshow('img', img)
@@ -151,26 +148,18 @@ def detect_hand(img, debug=False):
 	# Convert to HSV and blur.
 	#gray = cv2.cvtColor(mul, cv2.COLOR_BGR2GRAY)
 	gray = cv2.cvtColor(mul, cv2.COLOR_BGR2HSV)
-	#blur = cv2.GaussianBlur(gray, (10,10),0)
-	blur = gray
 
 	if debug:
 		cv2.imshow('img', blur)
 		cv2.waitKey(0)
 
-	# lower_thresh = np.array([0, 40, 60])
-	# upper_thresh = np.array([20, 150, 255])
 	lower_thresh = np.array([0, 70, 0])
 	upper_thresh = np.array([30, 171, 255])
-	#lower_thresh1 = np.array([0, 0, 0])
-	#upper_thresh1 = np.array([100, 100, 100])
 
-	mask = cv2.inRange(blur, lower_thresh, upper_thresh)
-	#_, mask = cv2.threshold(blur, 127, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+	mask = cv2.inRange(gray, lower_thresh, upper_thresh)
 	if debug:
 		cv2.imshow('img', mask)
 		cv2.waitKey(0)
-	#mask1 = cv2.inRange(blur, lower_thresh1, upper_thresh1)
 
 	# remove noise
 	#kernel = np.ones((5,5),np.uint8)
@@ -178,7 +167,7 @@ def detect_hand(img, debug=False):
 	hand_img = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
 
 
-	(contour, contour_area) = findLargestContour(hand_img)
+	(contour, contour_area) = findHandContour(hand_img)
 	print "contour area: ", contour_area
 	if contour is None:
 		warning = "Unable to find hand. Try moving your hand further away, or moving to a clean surface."
@@ -189,8 +178,8 @@ def detect_hand(img, debug=False):
 	print "hull length: %s" % len(hull)
 
 	# find COG and angle of hand contour
-	(center, axisAngle) = extractContourInfo(contour, IMG_SCALE)
-	print "(center, axisAngle) = ", center, axisAngle
+	(center, orientation) = extractContourInfo(contour, IMG_SCALE)
+	print "(center, orientation) = ", center, orientation
 
 	if debug:
 		# draw contour and convex hull
@@ -202,32 +191,18 @@ def detect_hand(img, debug=False):
 		(x,y),(MA,ma),angle = cv2.fitEllipse(contour)
 		print "angle = %f" % angle
 
-
+	# collect a list of finger defects
 	fingerTips, fingerFolds = findFingertips(contour, IMG_SCALE)
 
-	# for i in xrange(len(fingerTips)):
-	# 	cv2.line(drawing, fingerTips[i][0], fingerFolds[i], (0,255,255), 2)
-	# 	cv2.line(drawing, fingerTips[i][1], fingerFolds[i], (0,255,255), 2)
-	# 	cv2.circle(drawing, fingerFolds[i], 10, (255,255,0), -1)
-	# 	depth1 = np.linalg.norm(np.subtract(fingerTips[i][0],fingerFolds[i]))
-	# 	depth2 = np.linalg.norm(np.subtract(fingerTips[i][1],fingerFolds[i]))
-	# 	print "depth at %d: %.2f" % (i, max(depth1,depth2))
-
+	# select the finger defect most likely to be the thumb.
 	thumbPt = findThumb(fingerTips, fingerFolds)
 	if thumbPt:
 		if debug:
 			cv2.circle(drawing,thumbPt,15,[255,0,0],-1)
-			#[vx,vy,x,y] = cv2.fitLine(contour, cv2.cv.CV_DIST_L2,0,0.01,0.01)
-			#lefty = int((-x*vy/vx) + y)
-			#righty = int(((WIDTH-x)*vy/vx)+y)
-			#cv2.line(drawing,(WIDTH-1,righty),(0,lefty),(0,255,0),2)
 			cv2.imshow('img', drawing)
 			cv2.waitKey(0)
 		distCenterToThumb = np.linalg.norm(np.subtract(thumbPt, center))
 		print "thumb dist: ", distCenterToThumb
-		#if distCenterToThumb < 85 or 250 < distCenterToThumb:
-			#warning = "invalid thumb location"
-			#return warning
 		handUp = isHandUp(fingerTips, center)
 		if handUp:
 			if thumbPt[0] < center[0]:
