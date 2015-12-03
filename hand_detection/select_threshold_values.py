@@ -22,7 +22,7 @@ cv2.createTrackbar('v_high', 'result',0,255,nothing)
 
 while(1):
     #_, frame = cap.read()
-    frame = cv2.imread('hand_small_table.jpg', cv2.IMREAD_COLOR)
+    frame = cv2.imread('data/hand_small_table.jpg', cv2.IMREAD_COLOR)
     HEIGHT, WIDTH, _ = frame.shape
     frame = cv2.resize(frame, (WIDTH/3,HEIGHT/3))
 
