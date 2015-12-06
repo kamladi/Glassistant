@@ -24,6 +24,8 @@ def findHandContour(img):
 	return (largestContour, maxArea)
 
 
+# calculate the normalized orientation of the hand contour using spatial moments.
+# code adapted from http://www.javacodegeeks.com/2012/12/hand-and-finger-detection-using-javacv.html
 def calculateTilt(m11, m20, m02):
 	diff = m20 - m02
 	if diff == 0:
@@ -54,6 +56,7 @@ def calculateTilt(m11, m20, m02):
 	return 0
 
 # find COM and angle of hand contour
+# code adapted from http://www.javacodegeeks.com/2012/12/hand-and-finger-detection-using-javacv.html
 def extractContourInfo(contour, scale):
 	moments = cv2.moments(contour, 1)
 	m00 = moments['m00']
@@ -73,7 +76,8 @@ def extractContourInfo(contour, scale):
 
 	return (center, orientation)
 
-# returns of a list of the finger defects from the hand contour.
+# returns of a list of the possible finger defects from the hand contour
+# code adapted from http://www.javacodegeeks.com/2012/12/hand-and-finger-detection-using-javacv.html
 def findFingertips(contour, scale):
 	convexHull = cv2.convexHull(contour, returnPoints = False)
 	defects = cv2.convexityDefects(contour, convexHull)
@@ -117,8 +121,6 @@ def findThumb(fingerTips, fingerFolds):
 	return (maxFingerDepth_finger)
 
 # Determine if hand is facing up or down.
-# collects the "mean" of the finger defects, and checks if it is
-#		above or below the center of the hand.
 def isHandUp(fingerTips, center):
 	# collect the mean of the finger fold points
 	numFingerFolds = len(fingerTips)
@@ -130,7 +132,6 @@ def isHandUp(fingerTips, center):
 	# hand is upright if the mean fingerfold is
 	# above the center of the hand
 	return meanFingerFold[1] < center[1]
-
 
 
 # DETECT_HAND main hand detection function.
@@ -161,8 +162,8 @@ def detect_hand(img, debug=False):
 		cv2.imshow('img', mask)
 		cv2.waitKey(0)
 
-	# remove noise
-	#kernel = np.ones((5,5),np.uint8)
+	# remove noise using an "open" morphological transformation
+	#		(erosion followed by dilation)
 	kernel = np.ones((5,5),np.uint8)
 	hand_img = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
 

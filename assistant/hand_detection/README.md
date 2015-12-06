@@ -6,3 +6,5 @@ in the cognitive assitant
 2. `main.py` Script to run the hand recognition script with sample data (located in `data/`)
 
 3. `select_threshold_values.py` Script to interactively select the best thresholding values for a given image.
+It will load a set of trackbars for setting the low and high threshold values for each channel, and will display
+the result of thresholding an image with those values.

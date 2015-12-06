@@ -1,16 +1,16 @@
 import cv2
 import numpy as np
 
-
-# cap = cv2.VideoCapture(0)
-
+# No-Op function
 def nothing(x):
     pass
+
 # Creating a window for later use
 cv2.namedWindow('result')
 
 # Starting with 100's to prevent error while masking
-h,s,v = 100,100,100
+h_low,s_low,v_low = 50,50,50
+h_high,s_high,v_high = 100,100,100
 
 # Creating track bar
 cv2.createTrackbar('h_low', 'result',0,179,nothing)
@@ -21,7 +21,6 @@ cv2.createTrackbar('s_high', 'result',0,255,nothing)
 cv2.createTrackbar('v_high', 'result',0,255,nothing)
 
 while(1):
-    #_, frame = cap.read()
     frame = cv2.imread('data/hand_small_table.jpg', cv2.IMREAD_COLOR)
     HEIGHT, WIDTH, _ = frame.shape
     frame = cv2.resize(frame, (WIDTH/3,HEIGHT/3))
@@ -38,10 +37,10 @@ while(1):
     v_high = cv2.getTrackbarPos('v_high','result')
 
     # Normal masking algorithm
-    lower_blue = np.array([h_low,s_low,v_low])
-    upper_blue = np.array([h_high,s_high,v_high])
+    lower = np.array([h_low,s_low,v_low])
+    upper = np.array([h_high,s_high,v_high])
 
-    mask = cv2.inRange(hsv,lower_blue, upper_blue)
+    mask = cv2.inRange(hsv,lower, upper)
 
     result = cv2.bitwise_and(frame,frame,mask = mask)
 
@@ -51,7 +50,6 @@ while(1):
     if k == 27:
         break
 
-#cap.release()
 print "H = [%d,%d]" % (h_low,h_high)
 print "S = [%d,%d]" % (s_low,s_high)
 print "V = [%d,%d]" % (v_low,v_high)
