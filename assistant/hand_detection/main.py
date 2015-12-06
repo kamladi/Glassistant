@@ -15,8 +15,6 @@ def main():
 			if (counter % 30 == 0):
 				ret, img = cap.read()
 
-				#fgmask = fgbg.apply(frame)
-				#cv2.imshow('frame', fgmask)
 				warning = detect_hand(img, True)
 				if warning:
 					print warning
